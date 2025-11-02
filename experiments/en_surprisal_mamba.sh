@@ -11,11 +11,11 @@ batch=10
 
 # Mamba models to run (added variants)
 models=(
-    "state-spaces/mamba-2.8b-hf"
-    "state-spaces/mamba-1.4b-hf"
-    "state-spaces/mamba-790m-hf"
-    "state-spaces/mamba-370m-hf"
     "state-spaces/mamba-130m-hf"
+    "state-spaces/mamba-370m-hf"
+    "state-spaces/mamba-790m-hf"
+    "state-spaces/mamba-1.4b-hf"
+    "state-spaces/mamba-2.8b-hf"
 )
 
 echo "🐍 Mamba Model Experiments - Full Pipeline"
