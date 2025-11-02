@@ -219,4 +219,5 @@ __marimo__/
 
 .DS_Store
 data/
-surprials/
+data.tar.gz
+surprisals/
