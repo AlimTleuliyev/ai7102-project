@@ -6,32 +6,49 @@
 
 set -e  # Exit on error
 
+# Batch size (adjust if you run into OOM for larger models)
 batch=10
-arc="mamba-130m-hf"
+
+# Mamba models to run (added variants)
+models=(
+    "state-spaces/mamba-2.8b-hf"
+    "state-spaces/mamba-1.4b-hf"
+    "state-spaces/mamba-790m-hf"
+    "state-spaces/mamba-370m-hf"
+    "state-spaces/mamba-130m-hf"
+)
 
 echo "🐍 Mamba Model Experiments - Full Pipeline"
 echo "==========================================="
-echo "Model: state-spaces/${arc}"
-echo "Total experiments: 35 (7 n-grams × 5 context functions)"
+echo "Models: ${models[*]}"
+echo "Total experiments per model: 35 (7 n-grams × 5 context functions)"
 echo ""
 
-for ngram in "2" "3" "5" "7" "10" "20" "1000"
+for model in "${models[@]}"
+do
+    arc=$(basename "${model}")
+
+    echo "-------------------------------------------"
+    echo "Starting experiments for model: ${model} (id: ${arc})"
+    echo "-------------------------------------------"
+
+    for ngram in "2" "3" "5" "7" "10" "20" "1000"
 do
     for func in "delete" "lossy-0.5" "lossy-0.25" "lossy-0.125" "lossy-0.0625"
     do
-        result_dir="surprisals/DC-mamba/arch_${arc}-ngram_${ngram}-contextfunc_${func}"
+            result_dir="surprisals/DC-mamba/arch_${arc}-ngram_${ngram}-contextfunc_${func}"
         
         echo "=========================================="
         echo "📊 Processing: ngram=${ngram}, func=${func}"
         echo "=========================================="
         
         # Step 1: Calculate surprisal
-        echo "📊 Step 1/3: Calculate surprisal..."
-        python experiments/calc_surprisal_hf.py \
-            -m state-spaces/${arc} \
-            -o ${result_dir} \
-            --batchsize ${batch} \
-            -d data/DC/ngram_${ngram}-contextfunc_${func}.json
+            echo "📊 Step 1/3: Calculate surprisal..."
+            python experiments/calc_surprisal_hf.py \
+                -m "${model}" \
+                -o "${result_dir}" \
+                --batchsize ${batch} \
+                -d "data/DC/ngram_${ngram}-contextfunc_${func}.json"
         
         if [ $? -eq 0 ]; then
             echo "✅ Surprisal calculation complete!"
@@ -62,9 +79,13 @@ do
             exit 1
         fi
         
-        echo "✅ Completed: ${arc} - ngram_${ngram} - ${func}"
-        echo ""
+            echo "✅ Completed: ${arc} - ngram_${ngram} - ${func}"
+            echo ""
     done
+done
+
+    echo "✅ Finished all experiments for model: ${arc}"
+    echo ""
 done
 
 echo ""
