@@ -122,7 +122,6 @@ After running experiments, analyze results with:
 │   ├── en_surprisal_pretrained_mamba.sh  # Fine-tuned Mamba
 │   └── en_surprisal_pythia.sh    # Pythia experiments
 ├── notebooks/                    # Tutorial notebooks (01-06)
-├── preprocess/DC/                # Data preprocessing scripts
 ├── plots_v1.ipynb               # Main visualizations
 ├── plots_v2.ipynb               # Alternative visualizations
 ├── prepare_data.sh              # Data download script
