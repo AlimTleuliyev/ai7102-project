@@ -106,10 +106,20 @@ def main(args):
 
     article2scores = defaultdict(lambda: defaultdict(list))
     article2piece = json.load(open(args.data_path))
-    print(args.model_name)
-
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name.replace("_", "-"))
-    gpt2_model = AutoModelForCausalLM.from_pretrained(args.model_name.replace("_", "-"))
+    
+    # Load model and tokenizer - support both HuggingFace hub and local checkpoints
+    if args.checkpoint_path:
+        # Load from local checkpoint path
+        print(f"Loading model from local checkpoint: {args.checkpoint_path}")
+        print(f"Model identifier: {args.model_name}")
+        tokenizer = AutoTokenizer.from_pretrained(args.checkpoint_path)
+        gpt2_model = AutoModelForCausalLM.from_pretrained(args.checkpoint_path)
+    else:
+        # Load from HuggingFace hub (original behavior)
+        print(args.model_name)
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name.replace("_", "-"))
+        gpt2_model = AutoModelForCausalLM.from_pretrained(args.model_name.replace("_", "-"))
+    
     gpt2_model.to(device).eval()
     loss_fct = CrossEntropyLoss(ignore_index=-100, reduction="none")
     surprisal4pieces_list = []
@@ -172,10 +182,16 @@ if __name__ == "__main__":
         "--model-name",
         "-m",
         required=True,
-        help="HuggingFace model name (e.g., gpt2, meta-llama/Llama-2-7b-hf, or your custom model)"
+        help="HuggingFace model name (e.g., gpt2, meta-llama/Llama-2-7b-hf) or identifier for local checkpoint"
     )
     parser.add_argument("--data-path", "-d", required=True)
     parser.add_argument("--out-dir", "-o", required=True)
     parser.add_argument("--batchsize", type=int, default=-1)
+    parser.add_argument(
+        "--checkpoint-path",
+        "-c",
+        default=None,
+        help="Path to local model checkpoint. If provided, loads model from this path instead of HuggingFace hub. model-name will be used only for naming output directories."
+    )
     args = parser.parse_args()
     main(args)
