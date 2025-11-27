@@ -7,7 +7,7 @@
 set -e  # Exit on error
 
 # Batch size (adjust if you run into OOM for larger models)
-batch=10
+batch=1
 
 # Pythia models to run (from smallest to largest)
 models=(
@@ -18,7 +18,6 @@ models=(
     "EleutherAI/pythia-1.4b"
     "EleutherAI/pythia-2.8b"
     "EleutherAI/pythia-6.9b"
-    "EleutherAI/pythia-12b"
 )
 
 echo "🐍 Pythia Model Experiments - Full Pipeline"

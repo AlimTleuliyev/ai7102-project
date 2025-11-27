@@ -221,3 +221,6 @@ __marimo__/
 data/
 data.tar.gz
 surprisals/
+
+*.zip
+mamba-130m-local
