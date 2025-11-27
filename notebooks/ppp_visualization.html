@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPP Computation Pipeline - Visual Guide</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .section p {
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .diagram-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-box h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: white;
+            font-size: 1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 1em;
+            opacity: 0.9;
+            color: white;
+        }
+
+        .interpretation {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .interpretation h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .interpretation ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .interpretation li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .stage-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 30px 0 15px 0;
+            font-size: 1.5em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+
+        .stage-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 PPP Computation Pipeline</h1>
+            <p>Psychometric Predictive Power: Measuring Cognitive Alignment</p>
+        </header>
+
+        <div class="content">
+            <!-- Key Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>241,186</h3>
+                    <p>Observations (Word Readings)</p>
+                </div>
+                <div class="stat-card">
+                    <h3>0.007163</h3>
+                    <p>PPP (nats per observation)</p>
+                </div>
+                <div class="stat-card">
+                    <h3>3,455.22</h3>
+                    <p>Likelihood Ratio Statistic</p>
+                </div>
+                <div class="stat-card">
+                    <h3>p < 0.0001</h3>
+                    <p>Highly Significant!</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="nav-buttons">
+                <a href="#diagram1" class="nav-button">📊 Main Pipeline</a>
+                <a href="#diagram1-stages" class="nav-button">📑 3-Stage Breakdown</a>
+                <a href="#diagram2" class="nav-button">🔄 Side-by-Side</a>
+                <a href="#diagram3" class="nav-button">🧮 Mathematical Flow</a>
+                <a href="#diagram4" class="nav-button">💡 Key Insights</a>
+            </div>
+
+            <!-- Diagram 1: Complete Experimental Flow -->
+            <div class="section" id="diagram1">
+                <h2>📊 Complete Experimental Pipeline</h2>
+                <p>This diagram shows the end-to-end process of computing PPP, from raw text data through feature extraction, model fitting, and statistical comparison.</p>
+
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart TB
+    %% Data Sources
+    Text["📄 Text Data<br/>(241,186 words)"]
+
+    %% Feature Extraction
+    Text --> Extract["🔍 Feature Extraction"]
+    Extract --> BaseFeatures["📊 Baseline Features<br/>• Word length<br/>• Word frequency<br/>• Position (screen, line, segment)<br/>• Previous word features"]
+
+    Text --> LM["🤖 Language Model<br/>(GPT-2 / n-gram)"]
+    LM --> Surprisals["⚡ Surprisal Features<br/>• surprisal_i<br/>• surprisal_{i-1}<br/>• surprisal_{i-2}"]
+
+    Text --> Human["👤 Human Readers<br/>(Eye-tracking experiment)"]
+    Human --> Times["⏱️ True Reading Times<br/>(Target variable)"]
+
+    %% Model Fitting
+    BaseFeatures --> BaselineModel["📈 Baseline Model (A)<br/>time ~ freq + length + ...<br/>+ random effects"]
+    Times --> BaselineModel
+
+    BaseFeatures --> TestModel["📈 Test Model (B)<br/>time ~ surprisal + freq + length + ...<br/>+ random effects"]
+    Surprisals --> TestModel
+    Times --> TestModel
+
+    %% Optimization
+    BaselineModel --> OptA["⚙️ Maximum Likelihood<br/>Estimation (MLE)"]
+    TestModel --> OptB["⚙️ Maximum Likelihood<br/>Estimation (MLE)"]
+
+    %% Results
+    OptA --> LogLikA["📉 log L_A = -1,435,663.08<br/>(12 parameters)"]
+    OptB --> LogLikB["📉 log L_B = -1,433,935.47<br/>(15 parameters)"]
+
+    %% Comparison
+    LogLikA --> Compare["🔬 Model Comparison"]
+    LogLikB --> Compare
+
+    Compare --> Delta["📊 Δ log L = 1,727.61"]
+    Delta --> LR["📈 Likelihood Ratio Test<br/>LR = 2 × Δ log L = 3,455.22<br/>p < 0.0001 ✅"]
+
+    Delta --> PPP["🎯 PPP Calculation<br/>PPP = Δ log L / N<br/>PPP = 1,727.61 / 241,186<br/>= 0.007163 nats"]
+
+    PPP --> Conclusion["✨ Conclusion<br/>Surprisal significantly predicts<br/>human reading time!<br/>Model is cognitively plausible."]
+
+    %% Styling
+    classDef dataClass fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    classDef featureClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef modelClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef resultClass fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    classDef conclusionClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+
+    class Text,Times dataClass
+    class BaseFeatures,Surprisals,Extract,LM,Human featureClass
+    class BaselineModel,TestModel,OptA,OptB modelClass
+    class LogLikA,LogLikB,Compare,Delta,LR,PPP resultClass
+    class Conclusion conclusionClass
+                    </div>
+                </div>
+
+                <div class="interpretation">
+                    <h4>🎓 What This Shows:</h4>
+                    <ul>
+                        <li><strong>Three parallel processes:</strong> Extracting baseline features, computing surprisals, and collecting human reading times</li>
+                        <li><strong>Two models:</strong> Baseline (without surprisal) vs Test (with surprisal)</li>
+                        <li><strong>Statistical comparison:</strong> Likelihood ratio test and PPP computation</li>
+                        <li><strong>Final result:</strong> Surprisal significantly improves predictions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Stage-by-Stage Breakdown (For Slides) -->
+            <div class="section" id="diagram1-stages">
+                <h2>📑 Stage-by-Stage Breakdown (Perfect for Slides!)</h2>
+                <p>The complete pipeline broken into 3 digestible stages. Each diagram fits on one slide.</p>
+
+                <div class="info-box">
+                    <h3>💡 Tip for Presentations</h3>
+                    <p>Use these three diagrams on separate slides to explain the pipeline step-by-step. Each stage builds on the previous one!</p>
+                </div>
+
+                <!-- Stage 1: Data Collection -->
+                <div class="stage-header">
+                    <span class="stage-badge">Stage 1/3</span>
+                    🎬 Data Collection & Feature Extraction
+                </div>
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart LR
+    Text["📄 Text Data<br/>(241,186 words)"]
+
+    Text --> Extract["🔍 Feature<br/>Extraction"]
+    Text --> LM["🤖 Language<br/>Model"]
+    Text --> Human["👤 Human<br/>Readers"]
+
+    Extract --> BaseFeatures["📊 Baseline Features<br/>• Word length<br/>• Word frequency<br/>• Position info"]
+
+    LM --> Surprisals["⚡ Surprisal Features<br/>• surprisal_i<br/>• surprisal_{i-1}<br/>• surprisal_{i-2}"]
+
+    Human --> Times["⏱️ Reading Times<br/>(Target: time in ms)"]
+
+    classDef inputClass fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    classDef processClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef outputClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+
+    class Text inputClass
+    class Extract,LM,Human processClass
+    class BaseFeatures,Surprisals,Times outputClass
+                    </div>
+                </div>
+
+                <div class="interpretation">
+                    <h4>📌 Stage 1 Summary:</h4>
+                    <ul>
+                        <li><strong>Input:</strong> Raw text data (241,186 word observations)</li>
+                        <li><strong>Three parallel processes:</strong> Extract linguistic features, compute model surprisals, collect human reading times</li>
+                        <li><strong>Output:</strong> Three datasets ready for modeling</li>
+                    </ul>
+                </div>
+
+                <!-- Stage 2: Model Fitting -->
+                <div class="stage-header">
+                    <span class="stage-badge">Stage 2/3</span>
+                    ⚙️ Model Specification & Fitting
+                </div>
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart TB
+    subgraph Inputs["📥 INPUTS FROM STAGE 1"]
+        direction LR
+        BaseFeatures2["📊 Baseline Features"]
+        Surprisals2["⚡ Surprisals"]
+        Times2["⏱️ Reading Times"]
+    end
+
+    subgraph ModelA["🔵 MODEL A: Baseline"]
+        FormulaA["time ~ freq + length + position<br/>+ random_effects"]
+        FitA["Maximum Likelihood<br/>Estimation (MLE)"]
+        ParamsA["Find θ_A* that<br/>maximizes log L_A"]
+    end
+
+    subgraph ModelB["🟢 MODEL B: Test"]
+        FormulaB["time ~ surprisal + freq + length<br/>+ position + random_effects"]
+        FitB["Maximum Likelihood<br/>Estimation (MLE)"]
+        ParamsB["Find θ_B* that<br/>maximizes log L_B"]
+    end
+
+    BaseFeatures2 --> ModelA
+    Times2 --> ModelA
+    FormulaA --> FitA
+    FitA --> ParamsA
+
+    BaseFeatures2 --> ModelB
+    Surprisals2 --> ModelB
+    Times2 --> ModelB
+    FormulaB --> FitB
+    FitB --> ParamsB
+
+    ParamsA --> ResultA["📉 log L_A = -1,435,663.08<br/>12 parameters"]
+    ParamsB --> ResultB["📉 log L_B = -1,433,935.47<br/>15 parameters"]
+
+    classDef inputClass fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef modelAClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef modelBClass fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef resultClass fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+
+    class Inputs inputClass
+    class ModelA modelAClass
+    class ModelB modelBClass
+    class ResultA,ResultB resultClass
+                    </div>
+                </div>
+
+                <div class="interpretation">
+                    <h4>📌 Stage 2 Summary:</h4>
+                    <ul>
+                        <li><strong>Model A (Baseline):</strong> Predicts reading time using only linguistic features</li>
+                        <li><strong>Model B (Test):</strong> Same as Model A but ADDS surprisal features</li>
+                        <li><strong>MLE:</strong> Algorithm finds parameters that maximize likelihood of observed data</li>
+                        <li><strong>Output:</strong> Two fitted models with their log-likelihoods</li>
+                    </ul>
+                </div>
+
+                <!-- Stage 3: Comparison -->
+                <div class="stage-header">
+                    <span class="stage-badge">Stage 3/3</span>
+                    📊 Model Comparison & Results
+                </div>
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart TB
+    subgraph Results["📥 RESULTS FROM STAGE 2"]
+        LogLikA3["📉 Model A<br/>log L_A = -1,435,663.08<br/>12 parameters"]
+        LogLikB3["📉 Model B<br/>log L_B = -1,433,935.47<br/>15 parameters"]
+        LogLikA3 ~~~ LogLikB3
+    end
+
+    Results --> Diff["🔢 Calculate Difference<br/>Δ log L = log L_B - log L_A<br/>= 1,727.61"]
+
+    Diff --> Branch["Two Statistical Tests"]
+
+    Branch --> PPP3["🎯 PPP (Per-Observation)<br/>PPP = Δ log L / N<br/>= 1,727.61 / 241,186<br/>= 0.007163 nats/obs"]
+
+    Branch --> LR3["📈 Likelihood Ratio Test<br/>LR = 2 × Δ log L = 3,455.22<br/>Compare to χ²(3)<br/>p-value < 0.0001 ✅"]
+
+    PPP3 --> Conclusion3["✨ CONCLUSION<br/>Surprisal significantly predicts reading time!<br/>Model B is better: PPP > 0 + p < 0.0001<br/>Model is cognitively valid"]
+    LR3 --> Conclusion3
+
+    classDef resultClass fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef calcClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef branchClass fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef testClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef conclusionClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+
+    class Results resultClass
+    class Diff calcClass
+    class Branch branchClass
+    class PPP3,LR3 testClass
+    class Conclusion3 conclusionClass
+                    </div>
+                </div>
+
+                <div class="interpretation">
+                    <h4>📌 Stage 3 Summary:</h4>
+                    <ul>
+                        <li><strong>Comparison:</strong> Model B has higher log-likelihood (better fit)</li>
+                        <li><strong>PPP:</strong> Improvement per observation = 0.007163 nats</li>
+                        <li><strong>Statistical Test:</strong> LR = 3,455.22 with p < 0.0001 (extremely significant)</li>
+                        <li><strong>Conclusion:</strong> Adding surprisal significantly improves predictions → Model captures human-like processing</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3>🎯 How to Use in Presentations</h3>
+                    <p><strong>Slide 1:</strong> Show Stage 1 - explain data collection<br/>
+                    <strong>Slide 2:</strong> Show Stage 2 - explain the two competing models<br/>
+                    <strong>Slide 3:</strong> Show Stage 3 - reveal the results and conclusion<br/><br/>
+                    This creates a natural narrative arc: Setup → Method → Results</p>
+                </div>
+            </div>
+
+            <!-- Diagram 2: Side-by-Side Comparison -->
+            <div class="section" id="diagram2">
+                <h2>🔄 Side-by-Side Model Comparison</h2>
+                <p>This view clearly shows the difference between the baseline model (without surprisal) and the test model (with surprisal), making it easy to see what's being added and compared.</p>
+
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart LR
+    %% Input
+    subgraph Input["📥 INPUT DATA"]
+        Text1["Text<br/>(241,186 words)"]
+        Features["Baseline Features<br/>freq, length, position"]
+        RT["Reading Times<br/>(humans)"]
+    end
+
+    %% Baseline Path
+    subgraph Baseline["🔵 BASELINE MODEL A"]
+        direction TB
+        FormA["time ~ freq × length +<br/>freq_prev × length_prev +<br/>position + random_effects"]
+        FitA["Fit Model A<br/>(MLE)"]
+        ResA["log L_A = -1,435,663.08<br/>Per-obs: -5.952514"]
+    end
+
+    %% Test Path
+    subgraph Test["🟢 TEST MODEL B"]
+        direction TB
+        LM["Language Model"]
+        Surp["Extract Surprisals"]
+        FormB["time ~ surprisal +<br/>freq × length +<br/>freq_prev × length_prev +<br/>position + random_effects"]
+        FitB["Fit Model B<br/>(MLE)"]
+        ResB["log L_B = -1,433,935.47<br/>Per-obs: -5.945351"]
+    end
+
+    %% Comparison
+    subgraph Results["📊 COMPARISON"]
+        direction TB
+        Diff["Δ log L = 1,727.61"]
+        PPP2["PPP = 0.007163"]
+        Sig["LR = 3,455.22<br/>p < 0.0001 ✅"]
+        Concl["Surprisal is<br/>predictive!"]
+    end
+
+    %% Connections
+    Text1 --> Features
+    Text1 --> RT
+    Text1 --> LM
+
+    Features --> FormA
+    RT --> FormA
+    FormA --> FitA
+    FitA --> ResA
+
+    LM --> Surp
+    Surp --> FormB
+    Features --> FormB
+    RT --> FormB
+    FormB --> FitB
+    FitB --> ResB
+
+    ResA --> Diff
+    ResB --> Diff
+    Diff --> PPP2
+    Diff --> Sig
+    PPP2 --> Concl
+    Sig --> Concl
+
+    %% Styling
+    classDef inputClass fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef baseClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef testClass fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef resultClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+
+    class Input inputClass
+    class Baseline baseClass
+    class Test testClass
+    class Results resultClass
+                    </div>
+                </div>
+
+                <div class="interpretation">
+                    <h4>🎓 What This Shows:</h4>
+                    <ul>
+                        <li><strong>Parallel processing:</strong> Both models use the same input data</li>
+                        <li><strong>Key difference:</strong> Test model includes language model surprisals</li>
+                        <li><strong>Direct comparison:</strong> Log-likelihoods compared to compute PPP</li>
+                        <li><strong>Clear winner:</strong> Model B with surprisal performs significantly better</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Diagram 3: Detailed Mathematical Flow -->
+            <div class="section" id="diagram3">
+                <h2>🧮 Detailed Mathematical Flow</h2>
+                <p>Step-by-step mathematical computation showing how raw data transforms into the final PPP metric through maximum likelihood estimation and statistical testing.</p>
+
+                <div class="diagram-container">
+                    <div class="mermaid">
+flowchart TD
+    %% Start
+    Start["🎬 START: Raw Text Data"]
+
+    %% Data Preparation
+    Start --> Prep["📋 Data Preparation<br/>N = 241,186 observations"]
+
+    Prep --> Features1["Extract X₁: Baseline Features"]
+    Prep --> Features2["Extract X₂: Model Surprisals"]
+    Prep --> Target["Collect Y: Reading Times"]
+
+    %% Model Specification
+    Features1 --> SpecA["Specify Model A<br/>Y = β₀ + β₁X₁ + u + ε"]
+    Features1 --> SpecB["Specify Model B<br/>Y = β₀ + β₁X₁ + β₂X₂ + u + ε"]
+    Features2 --> SpecB
+    Target --> SpecA
+    Target --> SpecB
+
+    %% Likelihood Functions
+    SpecA --> LikA["Likelihood A<br/>L_A(θ_A | Y, X₁)"]
+    SpecB --> LikB["Likelihood B<br/>L_B(θ_B | Y, X₁, X₂)"]
+
+    %% Optimization
+    LikA --> MLEA["MLE: Find θ_A* that<br/>maximizes log L_A"]
+    LikB --> MLEB["MLE: Find θ_B* that<br/>maximizes log L_B"]
+
+    %% Results
+    MLEA --> ResultA["θ_A* → log L_A = -1,435,663"]
+    MLEB --> ResultB["θ_B* → log L_B = -1,433,935"]
+
+    %% Comparison
+    ResultA --> Comp["Compare Models"]
+    ResultB --> Comp
+
+    Comp --> Step1["Δ log L = log L_B - log L_A"]
+    Step1 --> Step2["Δ log L = 1,727.61"]
+
+    Step2 --> Step3["Per-observation:<br/>PPP = Δ log L / N"]
+    Step3 --> Step4["PPP = 1,727.61 / 241,186"]
+    Step4 --> Step5["PPP = 0.007163 nats"]
+
+    %% Statistical Test
+    Step2 --> Test1["LR = 2 × Δ log L"]
+    Test1 --> Test2["LR = 3,455.22"]
+    Test2 --> Test3["Compare to χ²(3)"]
+    Test3 --> Test4["p-value < 0.0001"]
+
+    %% Final
+    Step5 --> Final["✅ CONCLUSION<br/>Model B significantly better<br/>Surprisal is cognitively valid"]
+    Test4 --> Final
+
+    %% Styling
+    classDef startClass fill:#c5cae9,stroke:#283593,stroke-width:3px
+    classDef prepClass fill:#b2dfdb,stroke:#00695c,stroke-width:2px
+    classDef modelClass fill:#ffccbc,stroke:#d84315,stroke-width:2px
+    classDef mathClass fill:#f8bbd0,stroke:#880e4f,stroke-width:2px
+    classDef testClass fill:#fff59d,stroke:#f57f17,stroke-width:2px
+    classDef finalClass fill:#a5d6a7,stroke:#2e7d32,stroke-width:4px
+
+    class Start startClass
+    class Prep,Features1,Features2,Target prepClass
+    class SpecA,SpecB,LikA,LikB,MLEA,MLEB modelClass
+    class ResultA,ResultB,Comp,Step1,Step2,Step3,Step4,Step5 mathClass
+    class Test1,Test2,Test3,Test4 testClass
+    class Final finalClass
+                    </div>
+                </div>
+
+                <div class="interpretation">
+                    <h4>🎓 What This Shows:</h4>
+                    <ul>
+                        <li><strong>Data preparation:</strong> Extracting features and target variable</li>
+                        <li><strong>Model specification:</strong> Formal mathematical representation</li>
+                        <li><strong>MLE optimization:</strong> Finding parameters that maximize likelihood</li>
+                        <li><strong>PPP calculation:</strong> Normalized improvement per observation</li>
+                        <li><strong>Statistical validation:</strong> Likelihood ratio test confirms significance</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Diagram 4: Key Insights -->
+            <div class="section" id="diagram4">
+                <h2>💡 Key Insights: From Question to Conclusion</h2>
+                <p>A high-level conceptual view showing how the research question leads to methodology, mathematics, results, and final conclusions about cognitive alignment.</p>
+
+                <div class="diagram-container">
+                    <div class="mermaid">
+graph LR
+    subgraph Question["❓ RESEARCH QUESTION"]
+        Q["Does model surprisal<br/>predict human reading time?"]
+    end
+
+    subgraph Method["🔬 METHOD"]
+        M1["Build two models:<br/>A = without surprisal<br/>B = with surprisal"]
+        M2["Compare fit quality<br/>using log-likelihood"]
+    end
+
+    subgraph Math["📐 MATHEMATICS"]
+        Math1["Log-likelihood measures<br/>P(data | model)"]
+        Math2["Higher log-likelihood =<br/>Better fit"]
+        Math3["PPP = improvement<br/>per observation"]
+    end
+
+    subgraph Result["✨ RESULT"]
+        R1["Model B better by<br/>1,727.61 log-units"]
+        R2["PPP = 0.007163<br/>per word"]
+        R3["p < 0.0001<br/>Highly significant!"]
+    end
+
+    subgraph Conclusion["🎯 CONCLUSION"]
+        C["Surprisal captures<br/>human-like processing!<br/>Model is cognitively valid."]
+    end
+
+    Q --> M1
+    M1 --> M2
+    M2 --> Math1
+    Math1 --> Math2
+    Math2 --> Math3
+    Math3 --> R1
+    R1 --> R2
+    R2 --> R3
+    R3 --> C
+
+    classDef qClass fill:#e1bee7,stroke:#6a1b9a,stroke-width:3px
+    classDef mClass fill:#b3e5fc,stroke:#0277bd,stroke-width:2px
+    classDef mathClass fill:#ffccbc,stroke:#d84315,stroke-width:2px
+    classDef rClass fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    classDef cClass fill:#fff9c4,stroke:#f57f17,stroke-width:4px
+
+    class Question qClass
+    class Method mClass
+    class Math mathClass
+    class Result rClass
+    class Conclusion cClass
+                    </div>
+                </div>
+
+                <div class="interpretation">
+                    <h4>🎓 What This Shows:</h4>
+                    <ul>
+                        <li><strong>Research flow:</strong> From question to conclusion</li>
+                        <li><strong>Methodology:</strong> Comparative model approach</li>
+                        <li><strong>Mathematical foundation:</strong> Log-likelihood and PPP</li>
+                        <li><strong>Empirical results:</strong> Quantitative evidence</li>
+                        <li><strong>Scientific conclusion:</strong> Cognitive validity established</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Summary Box -->
+            <div class="info-box">
+                <h3>🎯 Key Takeaways</h3>
+                <p><strong>PPP (Psychometric Predictive Power)</strong> measures how much a language model's surprisal values align with human reading behavior. A PPP of 0.007163 means that for every word, adding surprisal improves prediction quality by 0.007163 nats. With overwhelming statistical significance (p < 0.0001), this demonstrates that the language model captures fundamental aspects of human language processing.</p>
+            </div>
+
+            <!-- Interpretation Guide -->
+            <div class="section">
+                <h2>📚 Interpretation Guide</h2>
+
+                <div class="interpretation">
+                    <h4>1. Baseline Features (X₁):</h4>
+                    <ul>
+                        <li>Word frequency (how common the word is)</li>
+                        <li>Word length (number of characters)</li>
+                        <li>Position effects (screen, line, segment)</li>
+                        <li>Previous word features</li>
+                    </ul>
+                </div>
+
+                <div class="interpretation">
+                    <h4>2. Surprisal Features (X₂):</h4>
+                    <ul>
+                        <li>How unexpected the word is to the language model</li>
+                        <li>Computed as: -log P(word | context)</li>
+                        <li>Includes current word and previous words</li>
+                    </ul>
+                </div>
+
+                <div class="interpretation">
+                    <h4>3. Maximum Likelihood Estimation (MLE):</h4>
+                    <ul>
+                        <li>Search for β values that maximize P(data | model)</li>
+                        <li>Optimization algorithm (LBFGS) does this automatically</li>
+                        <li>Result: Parameters that make observed data most probable</li>
+                    </ul>
+                </div>
+
+                <div class="interpretation">
+                    <h4>4. Log-Likelihood:</h4>
+                    <ul>
+                        <li>Sum of log probabilities across all observations</li>
+                        <li>Higher (less negative) = better fit</li>
+                        <li>Difference between models shows improvement</li>
+                    </ul>
+                </div>
+
+                <div class="interpretation">
+                    <h4>5. PPP (Psychometric Predictive Power):</h4>
+                    <ul>
+                        <li>Average improvement per observation</li>
+                        <li>Measured in "nats" (natural log units)</li>
+                        <li>PPP > 0 → Model captures human-like processing</li>
+                    </ul>
+                </div>
+
+                <div class="interpretation">
+                    <h4>6. Likelihood Ratio Test:</h4>
+                    <ul>
+                        <li>Tests if improvement is real or by chance</li>
+                        <li>LR = 2 × Δ log L follows χ² distribution</li>
+                        <li>p < 0.0001 → Definitely not by chance!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>PPP Visualization | Statistical Analysis of Language Models and Human Cognition</p>
+            <p>Generated from Notebook: 05_statistical_analysis.ipynb</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
